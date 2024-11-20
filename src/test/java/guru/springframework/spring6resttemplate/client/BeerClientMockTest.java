@@ -25,6 +25,7 @@ import java.util.Arrays;
 import java.util.UUID;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.ArgumentMatchers.isNull;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.client.match.MockRestRequestMatchers.method;
 import static org.springframework.test.web.client.match.MockRestRequestMatchers.requestTo;
@@ -60,6 +61,19 @@ public class BeerClientMockTest {
         beerClient = new BeerClientImpl(mockRestTemplateBuilder);
     }
 
+
+    @Test
+    void testGetBeerById() throws JsonProcessingException {
+        BeerDTO  beerDTO= getBeerDto();
+        String payload = objectMapper.writeValueAsString(beerDTO);
+
+        server.expect(method(HttpMethod.GET))
+                .andExpect(requestTo(URL + BeerClientImpl.GET_BEER_PATH + "/" + beerDTO.getId()))
+                .andRespond(withSuccess(payload, MediaType.APPLICATION_JSON));
+
+        BeerDTO beerById = beerClient.getBeerById(beerDTO.getId());
+        assertThat(beerById.getId()).isEqualTo(beerDTO.getId());
+    }
     @Test
     void testListBeers() throws JsonProcessingException {
         String payload = objectMapper.writeValueAsString(getPage());
